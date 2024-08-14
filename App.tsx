@@ -1,118 +1,160 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
-import React from 'react';
-import type {PropsWithChildren} from 'react';
+import {useState, useEffect, useCallback} from 'react';
 import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
   View,
+  ScrollView,
+  SafeAreaView,
+  Appearance,
+  StatusBar,
+  Text,
+  Image,
+  useColorScheme,
 } from 'react-native';
+import {THEMES, COLORS, images, SIZES} from './src/constants';
+import {LoginNavigation, AppNavigation} from './src/navigation';
+import {createStackNavigator} from '@react-navigation/stack';
+import {ActivityIndicator} from 'react-native';
+import {ThemeProvider, useTheme} from './src/contexts/ThemeContext';
+import NetInfo from '@react-native-community/netinfo';
+import Icon, {Icons} from './src/components/icons/Icons';
+import Logo from './assets/images/logo-transparent.png';
+import {NavigationContainer} from '@react-navigation/native';
+import {NetworkIndicator, LoadingIndicator} from './src/components/indicators';
+// @ts-ignore
+import {Amplify, Auth, Hub} from 'aws-amplify';
+import config from './src/aws-exports';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+Amplify.configure(config);
+const Stack = createStackNavigator();
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+interface Data {
+  payload: {
+    event: string;
+  };
+}
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+function Nav(user: any) {
   return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
+    <NavigationContainer>
+      <Stack.Navigator
+        initialRouteName="login"
+        screenOptions={{
+          headerShown: false,
+        }}>
+        {user ? (
+          <Stack.Screen name="app" component={AppNavigation} />
+        ) : (
+          <Stack.Screen name="login" component={LoginNavigation} />
+        )}
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
 
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+function App() {
+  const [user, setUser] = useState(null);
+  const {theme} = useTheme();
+  const checkUser = async () => {
+    try {
+      const authUser = await Auth.currentAuthenticatedUser({bypassCache: true});
+      setUser(authUser);
+    } catch (e) {
+      setUser(null);
+    }
+  };
+  useEffect(() => {
+    checkUser();
+  }, []);
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+  useEffect(() => {
+    const listener = (data: Data) => {
+      console.log(data);
+      if (data.payload.event === 'signIn' || data.payload.event === 'signOut') {
+        checkUser();
+      }
+    };
+
+    //const hubListenerCancelToken = Hub.listen('auth', listener);
+    //return hubListenerCancelToken();
+  }, []);
+
+  // State to track the network connection status
+  const [isConnected, setIsConnected] = useState(true); // Assume initially connected
+  const [initialCheckDone, setInitialCheckDone] = useState(false);
+
+  // Check network status
+  const checkNetworkStatus = async () => {
+    const netInfoState = await NetInfo.fetch();
+    const isConnected = netInfoState.isConnected ?? false;
+    setIsConnected(isConnected);
+    setInitialCheckDone(true);
   };
 
+  // Listen for network changes
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener(state => {
+      setIsConnected(state.isConnected ?? false);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  // Perform initial network check
+  useEffect(() => {
+    checkNetworkStatus();
+  }, []);
+
+  /*return (
+        <SafeAreaView style={{ flex: 1, backgroundColor: THEMES[theme.mode].bg }}>
+            <StatusBar
+                animated={true}
+                backgroundColor={THEMES[theme.mode].bg}
+                barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+                showHideTransition={"fade"}
+                hidden={false}
+            />
+            <NavigationContainer>
+                <Stack.Navigator 
+                    initialRouteName='login' 
+                    screenOptions={{ 
+                        headerShown: false,
+                    }} 
+                >
+                    {user ? 
+                    (<Stack.Screen name="app" component = {AppNavigation} />) : 
+                    (<Stack.Screen name="login" component = {LoginNavigation} />)
+                    }
+                </Stack.Navigator>
+            </NavigationContainer>
+        </SafeAreaView>
+    )*/
   return (
-    <SafeAreaView style={backgroundStyle}>
+    <SafeAreaView style={{flex: 1, backgroundColor: THEMES[theme.mode].bg}}>
       <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
+        animated={true}
+        backgroundColor={THEMES[theme.mode].bg}
+        barStyle={theme.mode === 'dark' ? 'light-content' : 'dark-content'}
+        showHideTransition={'fade'}
+        hidden={false}
       />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
+      {!isConnected ? (
+        <NetworkIndicator />
+      ) : user === undefined ? (
+        <LoadingIndicator />
+      ) : (
+        <Nav user={user} />
+      )}
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
+const RootApp = () => {
+  return (
+    <ThemeProvider>
+      <App />
+    </ThemeProvider>
+  );
+};
 
-export default App;
+export default RootApp;
