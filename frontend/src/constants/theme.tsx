@@ -48,7 +48,7 @@ const THEMES:ColorPalette = {
     bg: thCol.d,
     bgStrong: thCol.dS,
   },
-  makkah: {
+  mecca: {
     // blacks, gold, marble white
     fgLight: thCol.dL,
     fg: thCol.d,
@@ -58,7 +58,7 @@ const THEMES:ColorPalette = {
     bg: thCol.l,
     bgStrong: thCol.lS,
   },
-  madinah: {
+  madina: {
     // blues, light beige, greens
     fgLight: thCol.dL,
     fg: thCol.d,

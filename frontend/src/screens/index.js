@@ -1,13 +1,13 @@
-import SellScreen from "./Sell/SellScreen";
-import ShopScreen from "./Shop/ShopScreen";
+import DecksScreen from "./Decks/DecksScreen";
+import ReadScreen from "./Read/ReadScreen";
 import ProfileScreen from "./Profile/ProfileScreen";
-import ChatScreen from "./Chat/ChatScreen";
-import OrdersScreen from "./Orders/OrdersScreen";
+import ReciteScreen from "./Recite/ReciteScreen";
+import LearnScreen from "./Learn/LearnScreen";
 
 export {
-  SellScreen,
-  ShopScreen,
-  ProfileScreen,
-  ChatScreen,
-  OrdersScreen
+  DecksScreen,
+  ReadScreen,
+  LearnScreen,
+  ReciteScreen,
+  ProfileScreen
 };

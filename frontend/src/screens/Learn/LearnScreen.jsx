@@ -19,7 +19,7 @@ import { SURAHS } from '../../constants/surahs';
 
 const testData = SURAHS;
 
-const OrdersScreen = () => {
+const LearnScreen = () => {
   const {activeColors} = useTheme();
 
   return (
@@ -27,7 +27,6 @@ const OrdersScreen = () => {
       data={testData}
       keyExtractor={(item, index) => index.toString()}
       renderItem={({ item, index }) => {
-        const purchased = index % 2 === 0 ? 'Purchased' : 'Sold';
         return (
           <View style={[styles.subwrap, {backgroundColor: activeColors.bgLight}]}>
             <TouchableOpacity style={[styles.touchWrap, styles.subwrapMedium]}>
@@ -194,4 +193,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default OrdersScreen
+export default LearnScreen;

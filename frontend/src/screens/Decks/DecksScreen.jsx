@@ -8,12 +8,12 @@ import {
     FlatList
 } from 'react-native'
 import { COLORS, SIZES } from '../../constants';
-import styles from './sellscreen.style';
+import styles from './decksscreen.style';
 import { ThemeContext, useTheme } from '../../contexts/ThemeContext';
 import FgText from '../../components/common/text/FgText';
 
 
-const SellScreen = () => {
+const DecksScreen = () => {
     const {activeColors} = useTheme();
     const [hasItemsInCloset, setHasItemsInCloset] = useState(false);
 
@@ -44,4 +44,4 @@ const SellScreen = () => {
   )
 }
 
-export default SellScreen
+export default DecksScreen;

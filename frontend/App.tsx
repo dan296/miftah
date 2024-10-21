@@ -154,7 +154,7 @@ function App() {
       ) : user === undefined ? (
         <LoadingIndicator />
       ) : (
-        <Nav user={user} />
+        <Nav user={user}/>
       )}
     </SafeAreaView>
   );
