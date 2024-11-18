@@ -1,0 +1,1 @@
+export type { Surah } from "./surah";
